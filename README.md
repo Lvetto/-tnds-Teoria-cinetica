@@ -1,0 +1,2 @@
+# -tnds-Teoria-cinetica
+
