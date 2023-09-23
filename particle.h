@@ -4,12 +4,12 @@
 class Particle {
     public:
 
-    Particle(int posx, int posy, float velx=0, float vely = 0);
+    Particle(float posx, float posy, float velx=0, float vely = 0);
 
-    void update(float dt);
+    void update(int box[4], float dt=1);
 
     void draw(SDL_Renderer* renderer);
 
-    int pos[2];
+    float pos[2];
     float vel[2];
 };
