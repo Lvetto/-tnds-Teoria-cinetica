@@ -48,6 +48,7 @@ void init(win_data *data, int height, int width) {
         return;
     }
 
+    // start SDL_TTF. Used to render text
     if (TTF_Init() < 0) {
         SDL_Log("Impossibile inizializzare TTF: %s", SDL_GetError());
         return;
@@ -71,8 +72,6 @@ void drawText(SDL_Renderer *renderer, const char *text, int dest_x, int dest_y, 
     int height = textSurface->h; int width = textSurface->w;
     SDL_Rect dest = {dest_x, dest_y, width, height};
     SDL_RenderCopy(renderer, textTexture, nullptr, &dest);
-
-    // printf("%d\n", TTF_FontHeight(font));    // Debug!!
 
     // free up resources
     SDL_DestroyTexture(textTexture);

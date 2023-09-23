@@ -6,10 +6,10 @@ class Particle {
 
     Particle(float posx, float posy, float velx=0, float vely = 0);
 
-    void update(int box[4], float dt=1);
+    bool update(int box[4], float dt=1);    // updates particle position, return true if collision with wall happened
 
-    void draw(SDL_Renderer* renderer);
+    void draw(SDL_Renderer* renderer);      // draws particle on screen
 
-    float pos[2];
-    float vel[2];
+    float pos[2];   // particle position
+    float vel[2];   // particle velocity
 };
