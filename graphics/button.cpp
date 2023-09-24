@@ -69,13 +69,12 @@ void Button::draw(SDL_Renderer* renderer) {
 
     // clean up
     SDL_DestroyTexture(buttonTexture);
-
 }
 
 void Button::checkClick(int mouse_x, int mouse_y) {
-    // if button has a function assigned, check if button is clicked
+    // if button has a function assigned, check if it is clicked
     if (onClick_func) {
-        // check if mouse x and y is in the right interval
+        // check if mouse x and y are in the right interval
         if ((mouse_x >= pos[0]) and (mouse_x <= pos[0] + size[0])) {
             if ((mouse_y >= pos[1]) and (mouse_y <= pos[1] + size[1])) {
                 onClick_func();
@@ -85,7 +84,7 @@ void Button::checkClick(int mouse_x, int mouse_y) {
 }
 
 void Button::checkSelect(int mouse_x, int mouse_y) {
-    // check if mouse x and y is in the right interval
+    // check if mouse x and y are in the right interval
     if ((mouse_x >= pos[0]) and (mouse_x <= pos[0] + size[0])) {
             if ((mouse_y >= pos[1]) and (mouse_y <= pos[1] + size[1])) {
                 this->selected = true;

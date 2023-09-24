@@ -10,5 +10,5 @@ void drawCircle(SDL_Renderer* renderer, int centerX, int centerY, int radius, in
 
 void init(win_data *data, int height, int width);   // initialize SDL, create window and renderer
 
-// draw text on screen. Takes care of surface/texture creation and deletions and renders to window surface
+// draw text on screen. Takes care of surface/texture creation and deletions and renders to window surface. Default font path is hard-coded, consider this if editing folder structure!
 void drawText(SDL_Renderer *renderer, const char *text, int dest_x, int dest_y, SDL_Color color, int size=20, const char *font_path="Roboto-Regular.ttf");

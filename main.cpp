@@ -13,8 +13,9 @@ using namespace std;
 std::vector<Button> button_vect;
 std::vector<Particle> part_vec;
 
-// vectors used to keep track of past values o variables
+// vectors used to keep track of past values of variables
 std::vector<float> press_vec;
+std::vector<float> vol_vec;
 
 // define colors used in the code
 SDL_Color black = {0, 0, 0, 255};
@@ -36,6 +37,28 @@ void temp_plus();
 void temp_minus();
 void particle_plus();
 void particle_minus();
+
+float max(vector<float> v) {
+    float out = v[0];
+    for (auto &i: v)
+        if (i > out)
+            out = i;
+    return out;
+}
+
+template <typename type>
+float average(vector<type> v, int start=0, int end=-1, float (*func)(type)=nullptr) {
+    if (end < start)
+        end = v.size() - 1;
+    float out = 0;
+    for (int i=start; i <= end; i++) {
+        if (func)
+            out += func(v[i]) / static_cast<float>(end - start);
+        else
+            out += static_cast<float>(v[i]) / static_cast<float>(end - start);
+    }
+    return out;    
+}
 
 int main() {
     // initialize SDL and create window data
@@ -66,7 +89,7 @@ int main() {
     bool quit = false;
     SDL_Event event;
     while (!quit) {
-        Uint32 frameStart = SDL_GetTicks();
+        Uint32 frameStart = SDL_GetTicks();     // start timer used to limit the framerate
         while (SDL_PollEvent(&event)) {
 
             // check if window is closed
@@ -102,6 +125,7 @@ int main() {
 
         // update window content
         SDL_RenderPresent(wdata.renderer);
+
         cout << SDL_GetError();     // Debug!!!
 
         // limit framerate to 60 fps
@@ -156,6 +180,7 @@ void particle_minus() {
         part_vec.pop_back();
 }
 
+vector<float> avg_vec;
 
 void draw(win_data wdata, int box[4]) {
 
@@ -176,7 +201,7 @@ void draw(win_data wdata, int box[4]) {
     // compute and display temperature
     int temp = 0;
     for (auto &particle: part_vec) 
-        temp += ((particle.vel[0]*particle.vel[0]) + (particle.vel[1]*particle.vel[1]))/part_vec.size();
+        temp += ((particle.vel[0]*particle.vel[0]) + (particle.vel[1]*particle.vel[1]))/part_vec.size();    // temperature is (proportional to) the average squared speed
     char t_string[30] = "Temperatura: ";
     sprintf(t_string + strlen(t_string), "%d", temp);
     drawText(wdata.renderer, t_string, 550, 180, black);
@@ -195,21 +220,48 @@ void draw(win_data wdata, int box[4]) {
     float dq = 0;
     for (auto &particle: part_vec) {
             if (particle.update(box))
-                dq += 2 * pow(pow(particle.vel[0], 2) + pow(particle.vel[1], 2), 2);
+                dq += 2 * pow(pow(particle.vel[0], 2) + pow(particle.vel[1], 2), 2);    // pressure is (proportional to) the total change in momentum
             particle.draw(wdata.renderer);
         }
     float pressure = dq / (2 * (box[2] - box[0]) + 2 * (box[3] - box[1]));
     
     // add pressure to vector, limit vector size to 300 (5 seconds)
     press_vec.push_back(pressure);
-    if (press_vec.size() > 300)
+    if (press_vec.size() > 500)
         press_vec.erase(press_vec.begin());
     
     // write pressure to screen. The value displayed is the average over the last 5 seconds
-    pressure = 0;
-    for (auto &p: press_vec)
-        pressure += p / press_vec.size();
+    pressure = average(press_vec);
     char pr_string[30] = "Pressione: ";
     sprintf(pr_string + strlen(pr_string), "%.2f", pressure);
     drawText(wdata.renderer, pr_string, 550, 320, black);
+
+    vol_vec.push_back(volume);
+    if (vol_vec.size() > 300)
+        vol_vec.erase(vol_vec.begin());
+    
+
+    if (max(press_vec) != 0) {
+        for (int i=50; i<press_vec.size(); i++) {
+            float avg = average(press_vec, i-50, i);
+            int y1 = static_cast<int>(200 - 400 * (avg / max(press_vec)));
+            //int y2 = static_cast<int>(600 - 200 * (avg / (2*average(press_vec))));
+            SDL_SetRenderDrawColor(wdata.renderer, 0, 200, 0, 255); // verde
+            //SDL_RenderDrawPoint(wdata.renderer, x, y);
+            drawCircle(wdata.renderer, 950 + i, y1, 3, 2);
+            //SDL_SetRenderDrawColor(wdata.renderer, 0, 0, 200, 255); // blu
+            //drawCircle(wdata.renderer, 1000 + i, y2, 3, 2);
+        }
+
+        if (press_vec.size() > 50)
+            avg_vec.push_back(average(press_vec, press_vec.size() - 120));
+        if (avg_vec.size() > 500)
+            avg_vec.erase(avg_vec.begin());
+        for (int i=0; i<avg_vec.size(); i++) {
+            int y = static_cast<int>(600 - 200 * (avg_vec[i] / max(avg_vec)));
+            SDL_SetRenderDrawColor(wdata.renderer, 0, 0, 200, 255); // blu
+            drawCircle(wdata.renderer, 1000 + i, y, 3, 2);
+
+        }
+    }
 }
