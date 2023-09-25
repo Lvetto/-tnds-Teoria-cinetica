@@ -16,9 +16,13 @@ std::vector<Particle> part_vec;
 // vectors used to keep track of past values of variables
 std::vector<float> press_vec;
 std::vector<float> vol_vec;
+std::vector<float> temp_vec;
 
 // define colors used in the code
 SDL_Color black = {0, 0, 0, 255};
+SDL_Color red = {200, 0, 0, 255};
+SDL_Color green = {0, 150, 0, 255};
+SDL_Color blue = {0, 0, 200, 255};
 
 // constants used to control the framerate
 const int targetFPS = 60;
@@ -28,7 +32,7 @@ const int frameDelay = 1000 / targetFPS;
 void draw(win_data wdata, int box[4]);
 
 // vertices of the box containing the particles. {x_0, y_0, x_1, y_1}
-int box[] = {100, 100, 400, 400};
+int box[] = {100, 200, 400, 500};
 
 // functions used by the buttons
 void volume_plus();
@@ -60,6 +64,8 @@ float average(vector<type> v, int start=0, int end=-1, float (*func)(type)=nullp
     return out;    
 }
 
+void DrawGraph(int p0[2], int h, vector<float> v, win_data wdata, char title[20], SDL_Color color=blue);
+
 int main() {
     // initialize SDL and create window data
     win_data wdata;
@@ -67,20 +73,20 @@ int main() {
     srand(time(NULL));  // set "random" seed for rand()
 
     // create buttons and assign functions
-    button_vect.push_back(Button(750, 100, 50, 50, "+"));   // volume+
-    button_vect.push_back(Button(820, 100, 50, 50, "-"));   // volume-
+    button_vect.push_back(Button(750, 200, 50, 50, "+"));   // volume+
+    button_vect.push_back(Button(820, 200, 50, 50, "-"));   // volume-
 
     button_vect[0].onClick_func = &volume_plus;
     button_vect[1].onClick_func = &volume_minus;
 
-    button_vect.push_back(Button(750, 170, 50, 50, "+"));   // temperature+
-    button_vect.push_back(Button(820, 170, 50, 50, "-"));   // temperature-
+    button_vect.push_back(Button(750, 270, 50, 50, "+"));   // temperature+
+    button_vect.push_back(Button(820, 270, 50, 50, "-"));   // temperature-
 
     button_vect[2].onClick_func = &temp_plus;
     button_vect[3].onClick_func = &temp_minus;
 
-    button_vect.push_back(Button(750, 240, 50, 50, "+"));   // particle+
-    button_vect.push_back(Button(820, 240, 50, 50, "-"));   // particle-
+    button_vect.push_back(Button(750, 340, 50, 50, "+"));   // particle+
+    button_vect.push_back(Button(820, 340, 50, 50, "-"));   // particle-
 
     button_vect[4].onClick_func = &particle_plus;
     button_vect[5].onClick_func = &particle_minus;
@@ -172,7 +178,7 @@ void temp_minus() {
 void particle_plus() {
     float v1 = (rand() / static_cast<float>(RAND_MAX)) * 10 - 5;
     float v2 = (rand() / static_cast<float>(RAND_MAX)) * 10 - 5;
-    part_vec.push_back(Particle(250, 250, v1, v2));
+    part_vec.push_back(Particle(250, 350, v1, v2));
 }
 
 void particle_minus() {
@@ -196,7 +202,7 @@ void draw(win_data wdata, int box[4]) {
     int volume = (box[2] - box[0]) * (box[3] - box[1]);
     char v_string[30] = "Volume: ";
     sprintf(v_string + strlen(v_string), "%d", volume);
-    drawText(wdata.renderer, v_string, 550, 110, black);
+    drawText(wdata.renderer, v_string, 550, 210, black);
 
     // compute and display temperature
     int temp = 0;
@@ -204,12 +210,16 @@ void draw(win_data wdata, int box[4]) {
         temp += ((particle.vel[0]*particle.vel[0]) + (particle.vel[1]*particle.vel[1]))/part_vec.size();    // temperature is (proportional to) the average squared speed
     char t_string[30] = "Temperatura: ";
     sprintf(t_string + strlen(t_string), "%d", temp);
-    drawText(wdata.renderer, t_string, 550, 180, black);
+    drawText(wdata.renderer, t_string, 550, 280, black);
+
+    temp_vec.push_back(temp);
+    if (temp_vec.size() > 500)
+        temp_vec.erase(temp_vec.begin());
 
     // compute and display part count
     char p_string[30] = "Particelle: ";
     sprintf(p_string + strlen(p_string), "%d", static_cast<int>(part_vec.size()));
-    drawText(wdata.renderer, p_string, 550, 250, black);
+    drawText(wdata.renderer, p_string, 550, 350, black);
 
     // draw buttons
     for (auto &button: button_vect) {
@@ -219,7 +229,7 @@ void draw(win_data wdata, int box[4]) {
     // update particle position and compute pressure
     float dq = 0;
     for (auto &particle: part_vec) {
-            if (particle.update(box))
+            if (particle.update(box, 1))
                 dq += 2 * pow(pow(particle.vel[0], 2) + pow(particle.vel[1], 2), 2);    // pressure is (proportional to) the total change in momentum
             particle.draw(wdata.renderer);
         }
@@ -234,34 +244,66 @@ void draw(win_data wdata, int box[4]) {
     pressure = average(press_vec);
     char pr_string[30] = "Pressione: ";
     sprintf(pr_string + strlen(pr_string), "%.2f", pressure);
-    drawText(wdata.renderer, pr_string, 550, 320, black);
+    drawText(wdata.renderer, pr_string, 550, 420, black);
 
     vol_vec.push_back(volume);
-    if (vol_vec.size() > 300)
+    if (vol_vec.size() > 500)
         vol_vec.erase(vol_vec.begin());
     
-
+    // prevent division by zero
     if (max(press_vec) != 0) {
-        for (int i=50; i<press_vec.size(); i++) {
-            float avg = average(press_vec, i-50, i);
-            int y1 = static_cast<int>(200 - 400 * (avg / max(press_vec)));
-            //int y2 = static_cast<int>(600 - 200 * (avg / (2*average(press_vec))));
-            SDL_SetRenderDrawColor(wdata.renderer, 0, 200, 0, 255); // verde
-            //SDL_RenderDrawPoint(wdata.renderer, x, y);
-            drawCircle(wdata.renderer, 950 + i, y1, 3, 2);
-            //SDL_SetRenderDrawColor(wdata.renderer, 0, 0, 200, 255); // blu
-            //drawCircle(wdata.renderer, 1000 + i, y2, 3, 2);
-        }
-
+        // pressure values need to be averaged. If vector is shorter than 50, average can not be accurately computed. This reduces oscillations in values in the first frames that would mess up scaling for a few seconds
         if (press_vec.size() > 50)
             avg_vec.push_back(average(press_vec, press_vec.size() - 120));
+
+        // limit amount of values stored
         if (avg_vec.size() > 500)
             avg_vec.erase(avg_vec.begin());
-        for (int i=0; i<avg_vec.size(); i++) {
-            int y = static_cast<int>(600 - 200 * (avg_vec[i] / max(avg_vec)));
-            SDL_SetRenderDrawColor(wdata.renderer, 0, 0, 200, 255); // blu
-            drawCircle(wdata.renderer, 1000 + i, y, 3, 2);
-
-        }
     }
+
+    int p0_press[] = {950, 200};
+    char title1[] = "Pressione";
+    DrawGraph(p0_press, 150, avg_vec, wdata, title1, red);
+
+    int p0_vol[] = {950, 430};
+    char title2[] = "Volume";
+    DrawGraph(p0_vol, 150, vol_vec, wdata, title2, green);
+
+    int p0_temp[] = {950, 660};
+    char title3[] = "Temperatura";
+    DrawGraph(p0_temp, 150, temp_vec, wdata, title3, blue);
+}
+
+// draw a graph. Height is h+50. Width is 560
+void DrawGraph(int p0[2], int h, vector<float> v, win_data wdata, char title[20], SDL_Color color) {
+
+    // draw rectangle around graph
+    SDL_Rect r = {p0[0]-30, p0[1]-30-h, 560, h+50};
+    SDL_SetRenderDrawColor(wdata.renderer, 190, 190, 190, 255); // grigino
+    SDL_RenderFillRect(wdata.renderer, &r);
+
+    SDL_SetRenderDrawColor(wdata.renderer, 0, 0, 0, 255); // nero
+
+    // axis
+    SDL_RenderDrawLine(wdata.renderer, p0[0], p0[1] + 15, p0[0], p0[1] - h);
+    SDL_RenderDrawLine(wdata.renderer, p0[0] - 20, p0[1], p0[0] + 500, p0[1]);
+
+    // arrow on x axis
+    SDL_RenderDrawLine(wdata.renderer, p0[0], p0[1] - h, p0[0] + 10, p0[1] - h + 10);
+    SDL_RenderDrawLine(wdata.renderer, p0[0], p0[1] - h, p0[0] - 10, p0[1] - h + 10);
+
+    // arrow on y axis
+    SDL_RenderDrawLine(wdata.renderer, p0[0] + 500, p0[1], p0[0] + 490, p0[1] - 10);
+    SDL_RenderDrawLine(wdata.renderer, p0[0] + 500, p0[1], p0[0] + 490, p0[1] + 10);
+
+    // write title
+    drawText(wdata.renderer, title, p0[0] - 20, p0[1] - h - 25, black);
+
+    // draw points
+    SDL_SetRenderDrawColor(wdata.renderer, color.r, color.g, color.b, color.a);
+    for (int i=0; i<v.size(); i++) {
+            int y = static_cast<int>(p0[1] - h * (v[i] / max(v)));
+            drawCircle(wdata.renderer, p0[0] + i, y, 3, 2);
+        }
+
 }
