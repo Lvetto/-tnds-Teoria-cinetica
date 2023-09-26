@@ -1,8 +1,9 @@
 #include <iostream>
 #include <cmath>
 #include "graphics.h"
-#include "particle.h"
-#include <vector>
+//#include "particle.h"     already included in functions.h
+#include "functions.h"
+#include <vector>   // already included in functions.h
 #include <ctime>
 #include <cstdlib>
 #include <cstdio>
@@ -28,6 +29,9 @@ SDL_Color blue = {0, 0, 200, 255};
 const int targetFPS = 60;
 const int frameDelay = 1000 / targetFPS;
 
+// used to represent program state. false == running, true == should close
+bool quit = false;
+
 // stuff to be drawn on screen every cycle
 void draw(win_data wdata, int box[4]);
 
@@ -42,35 +46,19 @@ void temp_minus();
 void particle_plus();
 void particle_minus();
 
-float max(vector<float> v) {
-    float out = v[0];
-    for (auto &i: v)
-        if (i > out)
-            out = i;
-    return out;
-}
-
-template <typename type>
-float average(vector<type> v, int start=0, int end=-1, float (*func)(type)=nullptr) {
-    if (end < start)
-        end = v.size() - 1;
-    float out = 0;
-    for (int i=start; i <= end; i++) {
-        if (func)
-            out += func(v[i]) / static_cast<float>(end - start);
-        else
-            out += static_cast<float>(v[i]) / static_cast<float>(end - start);
-    }
-    return out;    
-}
-
+// function used to draw graphs. Not in graphics_functions to avoid making (more of) a mess with includes
 void DrawGraph(int p0[2], int h, vector<float> v, win_data wdata, char title[20], SDL_Color color=blue);
+
+// function used in the mainloop to check events
+void HandleEvents();
 
 int main() {
     // initialize SDL and create window data
     win_data wdata;
     init(&wdata, 700, 1500);
-    srand(time(NULL));  // set "random" seed for rand()
+
+    // set seed for rand()
+    srand(time(NULL));
 
     // create buttons and assign functions
     button_vect.push_back(Button(750, 200, 50, 50, "+"));   // volume+
@@ -91,36 +79,11 @@ int main() {
     button_vect[4].onClick_func = &particle_plus;
     button_vect[5].onClick_func = &particle_minus;
 
-    // main loop. Could get quite long, maybe move to a separate function?
-    bool quit = false;
-    SDL_Event event;
+    // main loop
     while (!quit) {
-        Uint32 frameStart = SDL_GetTicks();     // start timer used to limit the framerate
-        while (SDL_PollEvent(&event)) {
+        Uint32 frameStart = SDL_GetTicks();     // get time at the start of a frame
 
-            // check if window is closed
-            if (event.type == SDL_QUIT) {
-                quit = true;
-            }
-
-            // check if buttons are clicked
-            if (event.type == SDL_MOUSEBUTTONDOWN) {
-                if (event.button.button == SDL_BUTTON_LEFT) {
-                    int mouseX = event.button.x;
-                    int mouseY = event.button.y;
-                    for (auto &button: button_vect) button.checkClick(mouseX, mouseY);
-                }
-            }
-
-            // check if buttons are selected
-            if (event.type == SDL_MOUSEMOTION) {
-                int mouseX = event.motion.x;
-                int mouseY = event.motion.y;
-                //SDL_Log("Posizione cursore: (%d, %d)", mouseX, mouseY);
-                for (auto &button: button_vect) button.checkSelect(mouseX, mouseY);
-                   
-            }
-        }
+        HandleEvents();
 
         // clear window
         SDL_SetRenderDrawColor(wdata.renderer, 170, 170, 170, 255); // grigio
@@ -132,6 +95,7 @@ int main() {
         // update window content
         SDL_RenderPresent(wdata.renderer);
 
+        // print last error. SDL does not do so by default
         cout << SDL_GetError();     // Debug!!!
 
         // limit framerate to 60 fps
@@ -205,9 +169,7 @@ void draw(win_data wdata, int box[4]) {
     drawText(wdata.renderer, v_string, 550, 210, black);
 
     // compute and display temperature
-    int temp = 0;
-    for (auto &particle: part_vec) 
-        temp += ((particle.vel[0]*particle.vel[0]) + (particle.vel[1]*particle.vel[1]))/part_vec.size();    // temperature is (proportional to) the average squared speed
+    int temp = average(part_vec, &speed_mod2, 0, -1);
     char t_string[30] = "Temperatura: ";
     sprintf(t_string + strlen(t_string), "%d", temp);
     drawText(wdata.renderer, t_string, 550, 280, black);
@@ -261,6 +223,7 @@ void draw(win_data wdata, int box[4]) {
             avg_vec.erase(avg_vec.begin());
     }
 
+    // draw graphs
     int p0_press[] = {950, 200};
     char title1[] = "Pressione";
     DrawGraph(p0_press, 150, avg_vec, wdata, title1, red);
@@ -306,4 +269,31 @@ void DrawGraph(int p0[2], int h, vector<float> v, win_data wdata, char title[20]
             drawCircle(wdata.renderer, p0[0] + i, y, 3, 2);
         }
 
+}
+
+void HandleEvents() {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {     // iterate trough events and store them in "event"
+
+            // check if window is closed
+            if (event.type == SDL_QUIT) {
+                quit = true;
+            }
+
+            // check if buttons are clicked
+            if (event.type == SDL_MOUSEBUTTONDOWN) {
+                if (event.button.button == SDL_BUTTON_LEFT) {
+                    int mouseX = event.button.x;
+                    int mouseY = event.button.y;
+                    for (auto &button: button_vect) button.checkClick(mouseX, mouseY);
+                }
+            }
+
+            // check if buttons are selected
+            if (event.type == SDL_MOUSEMOTION) {
+                int mouseX = event.motion.x;
+                int mouseY = event.motion.y;
+                for (auto &button: button_vect) button.checkSelect(mouseX, mouseY);
+            }
+    }
 }

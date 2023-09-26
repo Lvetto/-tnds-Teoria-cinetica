@@ -42,4 +42,3 @@ void Particle::draw(SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 210, 0, 0, 255);   // rosso
     drawCircle(renderer, static_cast<int>(pos[0]), static_cast<int>(pos[1]), 10, 80);
 }
-
