@@ -16,9 +16,9 @@ float average(std::vector<type> v, int start, int end) {
     float out = 0;
 
     for (int i=start; i <= end; i++)
-        out+=static_cast<float>(v[i]) / static_cast<float>(end - start);
+        out+=static_cast<float>(v[i]) / static_cast<float>(end - start + 1);
 
-    return out;    
+    return out;
 }
 
 template <typename type>
@@ -28,7 +28,7 @@ float average(std::vector<type> v, float (*func)(type), int start, int end) {
     float out = 0;
 
     for (int i=start; i <= end; i++)
-        out+=func(v[i]) / static_cast<float>(end - start);
+        out+=func(v[i]) / static_cast<float>(end - start + 1);
 
     return out;    
 }

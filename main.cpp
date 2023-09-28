@@ -140,8 +140,16 @@ void temp_minus() {
 
 // create or destroy new particles by editing part_vec
 void particle_plus() {
-    float v1 = (rand() / static_cast<float>(RAND_MAX)) * 10 - 5;
-    float v2 = (rand() / static_cast<float>(RAND_MAX)) * 10 - 5;
+    // if there is at least one particle, initial velocity should be chosen taking in consideration average velocity of the others
+    float avg_vel;
+    if (part_vec.size() > 0)
+        avg_vel = pow(average(part_vec, &speed_mod2), 0.5);
+    else
+        avg_vel = 5;
+
+    // create new particle. Initial velocity should have random direction and random modulus chosen from an appropriate interval
+    float v1 = (rand() / static_cast<float>(RAND_MAX)) * 2 * avg_vel - avg_vel;
+    float v2 = (rand() / static_cast<float>(RAND_MAX)) * 2 * avg_vel - avg_vel;
     part_vec.push_back(Particle(250, 350, v1, v2));
 }
 
