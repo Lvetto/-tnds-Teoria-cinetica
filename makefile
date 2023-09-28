@@ -1,6 +1,6 @@
 COMP_FLAGS := -lSDL2 -lSDL2_ttf
 DBG_FLAGS := -O0 -g -Wall --pedantic
-FILENAMES := particle graphics/button graphics/graphics-functions
+FILENAMES := particle graphics/button graphics/graphics-functions functions
 
 HEADER_FILES := $(addsuffix .h, $(FILENAMES))
 OBJECT_FILES := $(addsuffix .o, $(FILENAMES))
