@@ -10,3 +10,10 @@ float average(std::vector<type> v, int start=0, int end=-1);    // compute avera
 
 template <typename type>
 float average(std::vector<type> v, float (*func)(type), int start=0, int end=-1);   // evaluates func on vector elements and computes average
+
+//float* solve_collision(float v1, float v2, float m1=1, float m2=1);
+
+template <typename type>
+std::vector<type*> generateUniquePairs(std::vector<type> &vec);
+
+float distance(Particle p1, Particle p2);

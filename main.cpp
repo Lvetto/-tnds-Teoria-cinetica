@@ -33,10 +33,12 @@ const int frameDelay = 1000 / targetFPS;
 bool quit = false;
 
 // stuff to be drawn on screen every cycle
-void draw(win_data wdata, int box[4]);
+void draw(win_data wdata, float box[4]);
 
 // vertices of the box containing the particles. {x_0, y_0, x_1, y_1}
-int box[] = {100, 200, 400, 500};
+float box[] = {100, 200, 400, 500};
+float box_vel[] = {0, 0, 0, 0};
+bool internal_collisions = true;
 
 // functions used by the buttons
 void volume_plus();
@@ -158,13 +160,21 @@ void particle_minus() {
         part_vec.pop_back();
 }
 
-vector<float> avg_vec;
+vector<float> avg_vec;      // used to average pressure over several cycles to reduce irregularities in graph. Not the best solution!
 
-void draw(win_data wdata, int box[4]) {
+void draw(win_data wdata, float box[4]) {
 
     // draw the box
-    SDL_Rect rect1 = {box[0], box[1], box[2] - box[0], box[3]-box[1]};
-    SDL_Rect rect2 = {box[0]+5, box[1]+5, box[2] - box[0] - 10, box[3] - box[1] - 10};
+    float center_x = (box[2]-box[0]) / 2;
+    float center_y = (box[3]-box[1]) / 2;
+    float width = box[2] - box[0];
+    float height = box[3] - box[1];
+    float correction_x = -0.2 * (box[0] - (250 - width / 2));
+    float correction_y = -0.2 * (box[1] - (350 - height / 2));
+    box_vel[0] += correction_x; box_vel[2] += correction_x;
+    box_vel[1] += correction_y; box_vel[3] += correction_y;
+    SDL_Rect rect1 = {static_cast<int>(box[0]), static_cast<int>(box[1]), static_cast<int>(width), static_cast<int>(height)};
+    SDL_Rect rect2 = {static_cast<int>(box[0]+5), static_cast<int>(box[1]+5), static_cast<int>(width - 10), static_cast<int>(height - 10)};
     SDL_SetRenderDrawColor(wdata.renderer, 0, 0, 200, 255); // blue
     SDL_RenderFillRect(wdata.renderer, &rect1);
     SDL_SetRenderDrawColor(wdata.renderer, 0, 0, 0, 255); // black
@@ -199,12 +209,54 @@ void draw(win_data wdata, int box[4]) {
     // update particle position and compute pressure
     float dq = 0;
     for (auto &particle: part_vec) {
-            if (particle.update(box, 1))
+            if (particle.update(box, 1, box_vel))
                 dq += 2 * pow(pow(particle.vel[0], 2) + pow(particle.vel[1], 2), 2);    // pressure is (proportional to) the total change in momentum
             particle.draw(wdata.renderer);
         }
     float pressure = dq / (2 * (box[2] - box[0]) + 2 * (box[3] - box[1]));
-    
+
+    /* if (internal_collisions) {
+        vector<Particle*> pairs = generateUniquePairs(part_vec);
+        for (auto &pair: pairs) {
+            if (distance(pair[0], pair[1]) < 10) {
+                float alpha = atan2(pair[0].pos[1] - pair[1].pos[1], pair[0].pos[0] - pair[1].pos[0]);
+
+                float v_par1 = pair[0].vel[1] * sin(alpha) + pair[0].vel[0] * cos(alpha);
+                float v_par2 = pair[1].vel[1] * sin(alpha) + pair[1].vel[0] * cos(alpha);
+
+                float v_perp1 = pair[0].vel[1] * cos(alpha) + pair[0].vel[0] * sin(alpha);
+                float v_perp2 = pair[1].vel[1] * cos(alpha) + pair[1].vel[0] * sin(alpha);
+
+                float* new_vels = solve_collision(v_par1, v_par2);
+
+                float mod1 = pow(pow(v_perp1, 2) + pow(new_vels[0], 2), 0.5);
+                pair[0].vel[0] = mod1 * cos(alpha);
+                pair[0].vel[1] = mod1 * sin(alpha);
+            }
+        }
+    } */
+
+    //printf("%f,%f,%f,%f\t", box_vel[0], box_vel[1], box_vel[2], box_vel[3]);
+    //printf("%f,%f,%f,%f\n", box[0], box[1], box[2], box[3]);
+
+    box[0] += box_vel[0];
+    box[1] += box_vel[1];
+    box[2] += box_vel[2];
+    box[3] += box_vel[3];
+
+    float F = 0.001;
+    box_vel[0] += F;
+    box_vel[1] += F;
+    box_vel[2] -= F;
+    box_vel[3] -= F;
+
+    /* box_vel[0] += -0.05 * box_vel[0];
+    box_vel[1] += -0.05 * box_vel[1];
+    box_vel[2] += -0.05 * box_vel[2];
+    box_vel[3] += -0.05 * box_vel[3]; */
+
+
+
     // add pressure to vector, limit vector size to 300 (5 seconds)
     press_vec.push_back(pressure);
     if (press_vec.size() > 500)
