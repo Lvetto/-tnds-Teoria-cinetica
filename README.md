@@ -21,10 +21,9 @@ Per eseguire questo programma, è necessario avere installate le seguenti dipend
 
 3. Apri un terminale o una finestra del prompt dei comandi e spostati nella directory del repository clonato.
 
-4. Esegui il programma utilizzando il comando seguente:  /make run
+4. Esegui il programma utilizzando il comando seguente:
+'''/make run
 
-Il programma si avvierà e ti fornirà un'interfaccia utente per interagire con il contenitore di gas.
+6. Usa i controlli dell'interfaccia utente per regolare la pressione, il volume e la temperatura e osserva come ciò influisce sulla simulazione e sui grafici visualizzati.
 
-5. Usa i controlli dell'interfaccia utente per regolare la pressione, il volume e la temperatura e osserva come ciò influisce sulla simulazione e sui grafici visualizzati.
-
-6. Per chiudere il programma, basta chiudere la finestra dell'applicazione.
+7. Per chiudere il programma, basta chiudere la finestra dell'applicazione.
