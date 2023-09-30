@@ -1,6 +1,6 @@
 # Simulazione della Teoria Cinetica dei Gas
 
-![Screenshot della Simulazione](https://imgur.com/a/9noAECn)
+![Screenshot della Simulazione](https://i.imgur.com/zvh0f2Z.png)
 
 ## Descrizione
 
