@@ -16,9 +16,9 @@ sudo apt-get install libsdl2-dev
 ```
   
 - [SDL-TTF](https://www.libsdl.org/projects/SDL_ttf/)
-   ```
-  sudo apt-get install libsdl2-ttf-dev
-  ```
+```
+sudo apt-get install libsdl2-ttf-dev
+```
 
 ## Istruzioni per l'Uso
 
