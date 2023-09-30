@@ -17,7 +17,7 @@ Button::Button(int pos_x, int pos_y, int size_x, int size_y, const char *text, i
 }
 
 void Button::createSurface(){
-    TTF_Font *font = TTF_OpenFont("Roboto-Regular.ttf", font_size);     // load default font
+    TTF_Font *font = TTF_OpenFont("default-font.ttf", font_size);     // load default font
     if (!font) {
         SDL_Log("Impossibile caricare il font: %s", SDL_GetError());
         return;

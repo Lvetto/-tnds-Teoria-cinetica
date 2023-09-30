@@ -26,7 +26,7 @@ run:	all
 debug:	main.cpp $(DBG_OBJECT_FILES) $(HEADER_FILES)
 	g++ -o deb_progr main.cpp $(DBG_OBJECT_FILES) $(COMP_FLAGS) $(DBG_FLAGS)
 
-# run the program with gdb
+# run the program with gdb terminal ui
 drun:	debug
 	gdbtui ./deb_progr
 
