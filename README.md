@@ -1,17 +1,17 @@
 # -tnds-Teoria-cinetica
 Simulazione della Teoria Cinetica dei Gas
 
-Descrizione
+##Descrizione
 La Simulazione della Teoria Cinetica dei Gas è un programma interattivo che consente agli utenti di esplorare i concetti chiave della fisica dei gas perfetti. Gli utenti possono modificare la pressione, il volume e la temperatura di un contenitore virtuale di gas e osservare le conseguenti interazioni molecolari e le proprietà termodinamiche attraverso grafici in tempo reale.
 
-#Dipendenze
+##Dipendenze
 Per eseguire questo programma, è necessario avere installate le seguenti dipendenze:
 
 SDL2
 SDL-TTF
 Assicurati di installare queste librerie prima di procedere con l'esecuzione del programma.
 
-#Istruzioni per l'Uso
+##Istruzioni per l'Uso
 Clona o scarica questa repository sul tuo computer.
 
 Assicurati di avere installate le dipendenze elencate sopra.
@@ -19,8 +19,8 @@ Assicurati di avere installate le dipendenze elencate sopra.
 Apri un terminale o una finestra del prompt dei comandi e spostati nella directory del repository clonato.
 
 Esegui il programma utilizzando i comandi seguenti:
-./make clean
-./make run
+  ./make clean
+  ./make run
 
 Il programma si avvierà e ti fornirà un'interfaccia utente per interagire con il contenitore di gas.
 
