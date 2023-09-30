@@ -22,10 +22,10 @@ Per eseguire questo programma, è necessario avere installate le seguenti dipend
 3. Apri un terminale o una finestra del prompt dei comandi e spostati nella directory del repository clonato.
 
 4. Esegui il programma utilizzando il comando seguente:
-'''
+```
 make clean
 make run
-'''
+```
 
 6. Usa i controlli dell'interfaccia utente per regolare la pressione, il volume e la temperatura e osserva come ciò influisce sulla simulazione e sui grafici visualizzati.
 
