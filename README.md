@@ -22,6 +22,7 @@ Per eseguire questo programma, è necessario avere installate le seguenti dipend
 3. Apri un terminale o una finestra del prompt dei comandi e spostati nella directory del repository clonato.
 
 4. Esegui il programma utilizzando il comando seguente:
+
 ```
 make clean
 make run
