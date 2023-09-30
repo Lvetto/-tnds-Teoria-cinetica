@@ -11,7 +11,14 @@ Questa simulazione della teoria cinetica dei gas è un programma interattivo che
 Per eseguire questo programma, è necessario avere installate le seguenti dipendenze:
 
 - [SDL2](https://libsdl.org/)
+```
+- sudo apt-get install libsdl2-dev
+```
+  
 - [SDL-TTF](https://www.libsdl.org/projects/SDL_ttf/)
+- ```
+  sudo apt-get install libsdl2-ttf-dev
+  ```
 
 ## Istruzioni per l'Uso
 
