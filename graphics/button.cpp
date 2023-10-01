@@ -50,7 +50,6 @@ void Button::createSurface(){
     // clean up
     SDL_FreeSurface(textSurface);
     TTF_CloseFont(font);
-
 }
 
 void Button::draw(SDL_Renderer* renderer) {

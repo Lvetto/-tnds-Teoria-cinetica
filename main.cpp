@@ -1,4 +1,3 @@
-#include <iostream>     // only actually used to display errors, should be debug only?
 #include <cmath>
 #include "graphics.h"
 //#include "particle.h"     already included in functions.h
@@ -7,6 +6,10 @@
 #include <ctime>
 #include <cstdlib>
 #include <cstdio>
+
+#ifdef DBG
+    #include <iostream>     // only needed to display sdl errors. Debug only
+#endif
 
 using namespace std;
 
@@ -22,11 +25,13 @@ vector<float> avg_vec;      // used to average pressure over several cycles to r
 
 // define colors used in the code
 SDL_Color black = {0, 0, 0, 255};
+SDL_Color white = {255, 255, 255, 255};
 SDL_Color red = {200, 0, 0, 255};
 SDL_Color green = {0, 150, 0, 255};
 SDL_Color blue = {0, 0, 200, 255};
 SDL_Color gray1 = {170, 170, 170, 255};
 SDL_Color gray2 = {190, 190, 190, 255};
+SDL_Color gray3 = {50, 50, 50, 255};
 
 // constants used to control the framerate
 const int targetFPS = 60;
@@ -111,7 +116,9 @@ int main() {
 
         SDL_RenderPresent(wdata.renderer);  // update window content
 
-        cout << SDL_GetError();     // print last error. SDL does not do so by default. Should be debug only?
+        #ifdef DBG
+            cout << SDL_GetError() << endl;     // print last error. SDL does not do so by default. Debug only
+        #endif
 
         // compute delay to limit framerate to 60 fps, if needed
         Uint32 frameTime = SDL_GetTicks() - frameStart;
@@ -291,12 +298,12 @@ void draw(win_data wdata) {
     sprintf(pr_string + strlen(pr_string), "%.2f", pressure);
 
     // draw text on window
-    drawText(wdata.renderer, v_string, 550, 160, black);
-    drawText(wdata.renderer, t_string, 550, 230, black);
-    drawText(wdata.renderer, p_string, 550, 300, black);
-    drawText(wdata.renderer, pr_string, 550, 370, black);
-    drawText(wdata.renderer, f_string, 550, 440, black);
-    drawText(wdata.renderer, m_string, 550, 510, black);
+    drawText(wdata.renderer, v_string, 550, 160, gray3);
+    drawText(wdata.renderer, t_string, 550, 230, gray3);
+    drawText(wdata.renderer, p_string, 550, 300, gray3);
+    drawText(wdata.renderer, pr_string, 550, 370, gray3);
+    drawText(wdata.renderer, f_string, 550, 440, gray3);
+    drawText(wdata.renderer, m_string, 550, 510, gray3);
 
     // draw buttons
     for (auto &button: button_vect)
@@ -353,7 +360,7 @@ void DrawGraph(int p0[2], int h, vector<float> v, win_data wdata, char title[20]
 
     // write title
     drawText(wdata.renderer, title, p0[0] - 20, p0[1] - h - 25, black);
-
+    
     // draw points
     SDL_SetRenderDrawColor(wdata.renderer, color.r, color.g, color.b, color.a);
     for (int i=0; i<v.size(); i++) {

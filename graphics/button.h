@@ -6,9 +6,9 @@ class Button {
 
     Button(int posx, int posy, int size_x, int size_y, const char *text, int font_size=15);     // initialize button. Position is top left corner
 
-    void createSurface();   // generates the surface used to draw the button
+    void createSurface();   // generate the surface used to draw the button
 
-    void draw(SDL_Renderer* renderer);  // draws button to screen
+    void draw(SDL_Renderer* renderer);  // draw button to screen
 
     void checkClick(int mouse_x, int mouse_y);  // check if button is clicked
 
